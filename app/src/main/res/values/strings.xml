@@ -9,5 +9,7 @@
     <string name="buy_ads_free">Buy ads free</string>
     <string name="settings">Settings</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="notepad">Notepad</string>
     <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="empty_note">You haven\'t got any notes \n  Tap the below button to create a note</string>
 </resources>

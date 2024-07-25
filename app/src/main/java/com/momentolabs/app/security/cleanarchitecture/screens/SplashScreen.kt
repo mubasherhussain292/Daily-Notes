@@ -35,7 +35,9 @@ fun SplashScreen(navController: NavController) {
         )
 
         delay(3000)
-        navController.navigate(NavigationItem.Home.route)
+        navController.navigate(NavigationItem.Home.route) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+        }
     }
 
 

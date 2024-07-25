@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.momentolabs.app.security.cleanarchitecture.navigation.NavigationItem
 import com.momentolabs.app.security.cleanarchitecture.screens.SplashScreen
+import com.momentolabs.app.security.cleanarchitecture.screens.createNotes.CreateNotes
 import com.momentolabs.app.security.cleanarchitecture.screens.home.HomeScreen
 import com.momentolabs.app.security.cleanarchitecture.ui.theme.CleanArchitectureTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,6 +57,10 @@ class MainActivity : ComponentActivity() {
 
             composable(route = NavigationItem.Home.route) {
                 HomeScreen(navHostController)
+            }
+
+            composable(route = NavigationItem.CreateNotes.route) {
+                CreateNotes(navHostController)
             }
 
 
