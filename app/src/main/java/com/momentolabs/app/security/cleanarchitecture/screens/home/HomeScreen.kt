@@ -1,6 +1,7 @@
 package com.momentolabs.app.security.cleanarchitecture.screens.home
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,20 +42,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.momentolabs.app.security.cleanarchitecture.R
+import com.momentolabs.app.security.cleanarchitecture.models.Notes
 import com.momentolabs.app.security.cleanarchitecture.navigation.NavigationItem
+import com.momentolabs.app.security.cleanarchitecture.screens.createNotes.NotesViewModel
+import com.momentolabs.app.security.cleanarchitecture.utils.Resources
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(navController: NavController) {
+    val viewModel: NotesViewModel = hiltViewModel()
+    val notesStates by viewModel.allNotes.collectAsState()
     val isSearchMode = remember { mutableStateOf(true) }
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
-    val notesItems = listOf("0", "1", "2")
-
 
     Scaffold(
         topBar = {
@@ -123,47 +130,85 @@ fun HomeScreen(navController: NavController) {
         },
         content = {
 
-            ConstraintLayout(modifier = Modifier.fillMaxSize().padding(paddingValues = it)) {
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = it)
+            ) {
 
                 val (placeHolderText, allNotesItems) = createRefs()
-                if (notesItems.isEmpty()) {
-                    Text(text = stringResource(id = R.string.empty_note), fontSize = 16.sp, color = Color.DarkGray,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.constrainAs(placeHolderText) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        })
-                } else {
-                    LazyColumn(modifier = Modifier
-                        .fillMaxSize()
-                        .constrainAs(allNotesItems) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }) {
-                        items(notesItems.size) { index ->
-                            AllNotesItems(eachNote = index, notesItems)
-                        }
+                Log.d(TAG, "HomeScreen: $notesStates")
+                when (notesStates) {
+                    is Resources.onLoading -> {
+
                     }
+
+                    is Resources.onError -> {
+
+                    }
+
+                    is Resources.onSuccess -> {
+                        val notesData = (notesStates as Resources.onSuccess<List<Notes>>).data
+                        if (notesData.isEmpty()) {
+                            Text(text = stringResource(id = R.string.empty_note), fontSize = 16.sp, color = Color.DarkGray,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.constrainAs(placeHolderText) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                })
+                        } else {
+                            LazyColumn(modifier = Modifier
+                                .fillMaxSize()
+                                .constrainAs(allNotesItems) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }) {
+                                items(notesData.size) { index ->
+                                    AllNotesItems(eachNote = index, notesData)
+                                }
+                            }
+                        }
+
+                    }
+
                 }
+
+
             }
 
 
         }
+
+
     )
-
-
 }
 
 
 @Composable
-fun AllNotesItems(eachNote: Int, list: List<String>) {
-    Text(text = list[eachNote],
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        style = MaterialTheme.typography.bodyLarge)
+fun AllNotesItems(eachNote: Int, list: List<Notes>) {
+
+    Card(modifier = Modifier.padding(5.dp)) {
+
+        Text(
+            text = list[eachNote].noteTitle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = list[eachNote].notesDescription,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 
@@ -173,3 +218,6 @@ fun Preview() {
     val navController = rememberNavController()
     HomeScreen(navController)
 }
+
+private const val TAG = "HomeScreen"
+
