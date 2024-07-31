@@ -1,21 +1,20 @@
 package com.momentolabs.app.security.cleanarchitecture.screens.createNotes
 
+import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.Icons.Outlined
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -123,8 +122,7 @@ fun CreateNotes(navController: NavController) {
                 modifier = Modifier
                     .padding(0.dp, 0.dp, 15.dp, 0.dp)
                     .clickable {
-                        saveData(notesTitle, notesDescription, viewModel)
-
+                        saveData(notesTitle, notesDescription, viewModel, navController, context)
                     }
                     .constrainAs(save) {
                         end.linkTo(location.start)
@@ -197,6 +195,10 @@ fun CreateNotes(navController: NavController) {
 
     }
 
+    BackHandler {
+        navController.popBackStack()
+    }
+
 }
 
 fun getCurrentDate(): String {
@@ -205,8 +207,13 @@ fun getCurrentDate(): String {
 }
 
 
-fun saveData(title: String, description: String, viewModel: NotesViewModel) {
-    val notes = Notes(0, title, description, getCurrentDate())
-    viewModel.insertNotes(notes = notes)
+fun saveData(title: String, description: String, viewModel: NotesViewModel, navController: NavController, context: Context) {
+    if (title.isNotEmpty()) {
+        val notes = Notes(0, title, description, getCurrentDate())
+        viewModel.insertNotes(notes = notes)
+        navController.popBackStack()
+    } else {
+        Toast.makeText(context, "please write any title", Toast.LENGTH_SHORT).show()
+    }
 }
 

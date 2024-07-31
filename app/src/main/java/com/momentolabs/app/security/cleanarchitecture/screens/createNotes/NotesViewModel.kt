@@ -18,6 +18,8 @@ class NotesViewModel @Inject constructor(private val repo: NotesRepository) : Vi
     private val _notes = MutableStateFlow<Resources<List<Notes>>>(Resources.onLoading)
     val allNotes: StateFlow<Resources<List<Notes>>> get() = _notes
 
+    val deletionList = ArrayList<Int>()
+
     init {
         getAllNotes()
     }
@@ -31,5 +33,11 @@ class NotesViewModel @Inject constructor(private val repo: NotesRepository) : Vi
     fun insertNotes(notes: Notes) = viewModelScope.launch(Dispatchers.IO) {
         repo.insetNotes(notes)
     }
+
+
+    fun deleteNotes(userId: ArrayList<Int>) = viewModelScope.launch(Dispatchers.IO) {
+        repo.deleteNotes(userId)
+    }.invokeOnCompletion { deletionList.clear() }
+
 
 }

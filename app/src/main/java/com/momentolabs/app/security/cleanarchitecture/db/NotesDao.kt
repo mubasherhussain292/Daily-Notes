@@ -16,4 +16,9 @@ interface NotesDao {
     @Query("Select * From Notes")
     fun getAllNotes(): Flow<List<Notes>>
 
+
+    @Query("DELETE FROM notes WHERE id IN (:idList)")
+    fun deleteByIdList(idList: List<Int>)
+
+
 }
