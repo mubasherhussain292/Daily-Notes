@@ -3,7 +3,7 @@ package com.momentolabs.app.security.cleanarchitecture.navigation
 enum class Screen {
     Splash,
     Home,
-    CreateNotes
+    CreateNotes,
 }
 
 sealed class NavigationItem(val route: String) {

@@ -2,7 +2,6 @@ package com.momentolabs.app.security.cleanarchitecture.screens.createNotes
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,7 +22,8 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -50,7 +51,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private const val TAG = "CreateNotes"
 
 @Composable
 fun CreateNotes(navController: NavController) {
@@ -58,11 +58,11 @@ fun CreateNotes(navController: NavController) {
     val context = LocalContext.current.applicationContext
     var notesTitle by remember { mutableStateOf("") }
     var notesDescription by remember { mutableStateOf("") }
+    var showingDialog by remember { mutableStateOf(false) }
     var images by remember { mutableStateOf(listOf<Uri>()) }
 
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
         images = it
-        Log.d(TAG, "CreateNotes: $images")
     }
 
     ConstraintLayout {
@@ -200,7 +200,7 @@ fun CreateNotes(navController: NavController) {
                     height = Dimension.fillToConstraints
                 }) {
                 items(images.size) {
-                    AsyncImage(model = images[it], contentDescription = null,modifier = Modifier.padding(5.dp))
+                    AsyncImage(model = images[it], contentDescription = null, modifier = Modifier.padding(5.dp))
                 }
             }
         }
@@ -239,22 +239,74 @@ fun CreateNotes(navController: NavController) {
 
     }
 
+
+    if (showingDialog) {
+        ConfirmationDialog(navController) {
+            showingDialog = false
+        }
+    }
+
     BackHandler {
-        /*https://stackoverflow.com/questions/71534415/composable-invocations-can-only-happen-from-the-context-of-a-composable-functio*/
-//        ConfirmationDialog(navController)
+        if (notesTitle.isNotEmpty()) showingDialog = true
+        else navController.popBackStack()
     }
 }
 
 @Composable
-fun ConfirmationDialog(navController: NavController) {
+fun ConfirmationDialog(navController: NavController, onDismiss: () -> Unit) {
 
-    Dialog(onDismissRequest = { navController.popBackStack() }) {
+    Dialog(onDismissRequest = { }) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(), shape = RoundedCornerShape(16.dp)
+        ) {
+
+            ConstraintLayout {
+
+                val (text, dismiss, sure) = createRefs()
+
+                Text(text = stringResource(id = R.string.sure_want_to_cancel), modifier = Modifier
+                    .padding(10.dp)
+                    .constrainAs(text) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    })
+
+                ElevatedButton(onClick = {
+                    onDismiss.invoke()
+                    navController.popBackStack()
+                }, modifier = Modifier
+                    .padding(10.dp)
+                    .background(color = Color.Transparent)
+                    .constrainAs(sure) {
+                        end.linkTo(parent.end)
+                        top.linkTo(text.bottom)
+                    }) {
+                    Text(text = "yes")
+                }
+
+
+                ElevatedButton(onClick = { onDismiss.invoke() }, modifier = Modifier
+                    .padding(10.dp)
+                    .constrainAs(dismiss) {
+                        end.linkTo(sure.start)
+                        top.linkTo(text.bottom)
+                    }) {
+                    Text(text = "cancel")
+                }
+
+
+            }
+
+        }
 
     }
 
 
 }
-
 
 
 fun getCurrentDate(): String {

@@ -15,4 +15,5 @@
     <string name="terms_and_conditions">Terms &amp; Conditions</string>
     <string name="title_limit_exceed">Title Limit Exceed</string>
     <string name="empty_note">You haven\'t got any notes \n  Tap the below button to create a note</string>
+    <string name="sure_want_to_cancel">Are you sure to want to cancel?</string>
 </resources>
